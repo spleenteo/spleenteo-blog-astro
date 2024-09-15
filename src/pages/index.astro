@@ -1,7 +1,7 @@
 ---
 import { graphql } from '~/lib/datocms/graphql';
 import Layout from '../layouts/Layout.astro';
-import { TagFragment } from '~/lib/datocms/commonFragments';
+import { TagFragment, responsiveImageFragment } from '~/lib/datocms/commonFragments';
 import { executeQuery } from '~/lib/datocms/executeQuery';
 import { StructuredText } from '@datocms/astro';
 
@@ -24,6 +24,7 @@ import { ImageBlockFragment } from '~/components/blocks/ImageBlock/fragments';
 
 import { ImageGalleryBlock } from '~/components/blocks/ImageGalleryBlock';
 import { ImageGalleryBlockFragment } from '~/components/blocks/ImageGalleryBlock/fragments';
+import { ResponsiveImageFragment } from '~/components/ResponsiveImage/fragments';
 
 /**
  * The GraphQL query that will be executed for this route to generate the page
@@ -31,58 +32,104 @@ import { ImageGalleryBlockFragment } from '~/components/blocks/ImageGalleryBlock
  *
  * Thanks to gql.tada, the result will be fully typed!
  */
-const query = graphql(
+ const query = graphql(
   /* GraphQL */ `
-    query BasicPageQuery {
-      page {
-        _seoMetaTags {
-          ...TagFragment
-        }
-        title
-        _firstPublishedAt
-        structuredText {
-          value
-          blocks {
-            ... on RecordInterface {
-              id
-              __typename
-            }
-            ... on ImageBlockRecord {
-              ...ImageBlockFragment
-            }
-            ... on ImageGalleryBlockRecord {
-              ...ImageGalleryBlockFragment
-            }
-            ... on VideoBlockRecord {
-              ...VideoBlockFragment
-            }
-          }
-          links {
-            ... on RecordInterface {
-              id
-              __typename
-            }
-            ...PageLinkFragment
-            ...PageInlineFragment
-          }
-        }
+  query BasicPageQuery {
+    blog {
+      title
+      subtitle
+      _firstPublishedAt
+
+      _seoMetaTags {
+        ...TagFragment
       }
     }
+    allPosts(orderBy: date_DESC) {
+      title
+      slug
+      excerpt
+      date
+      id
+      coverImage {
+        responsiveImage(imgixParams: {fm: jpg, fit: crop, w: 2000, h: 1000 }) {
+          ...ResponsiveImageFragment
+        }
+      }
+      category{
+        name
+        slug
+        id
+      }
+      tags{
+        name
+        slug
+        id
+      }
+    }
+  }
   `,
   [
     TagFragment,
-    ImageBlockFragment,
-    ImageGalleryBlockFragment,
-    VideoBlockFragment,
-    PageLinkFragment,
-    PageInlineFragment,
+    ResponsiveImageFragment,
+    // ImageGalleryBlockFragment,
+    // VideoBlockFragment,
+    // PageLinkFragment,
+    // PageInlineFragment,
   ],
 );
 
-const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
-const { page } = await executeQuery(query, { includeDrafts: draftModeEnabled });
+// const query = graphql(
+//   /* GraphQL */ `
+//     query BasicPageQuery {
+//       blog {
+//         _seoMetaTags {
+//           ...TagFragment
+//         }
+//         title
+//         _firstPublishedAt
+//         structuredText {
+//           value
+//           blocks {
+//             ... on RecordInterface {
+//               id
+//               __typename
+//             }
+//             ... on ImageBlockRecord {
+//               ...ImageBlockFragment
+//             }
+//             ... on ImageGalleryBlockRecord {
+//               ...ImageGalleryBlockFragment
+//             }
+//             ... on VideoBlockRecord {
+//               ...VideoBlockFragment
+//             }
+//           }
+//           links {
+//             ... on RecordInterface {
+//               id
+//               __typename
+//             }
+//             ...PageLinkFragment
+//             ...PageInlineFragment
+//           }
+//         }
+//       }
+//     }
+//   `,
+//   [
+//     TagFragment,
+//     ImageBlockFragment,
+//     ImageGalleryBlockFragment,
+//     VideoBlockFragment,
+//     PageLinkFragment,
+//     PageInlineFragment,
+//   ],
+// );
 
-if (!page) {
+const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
+const { blog } = await executeQuery(query, { includeDrafts: draftModeEnabled });
+
+if (!blog) {
   return new Response(null, {
     status: 404,
     statusText: 'Not found',
@@ -90,50 +137,10 @@ if (!page) {
 }
 ---
 
-<Layout additionalSeo={page._seoMetaTags}>
-  <h1>{page.title}</h1>
-  {
-    /*
-     * Structured Text is a JSON format similar to HTML, but with the advantage
-     * of a significantly reduced and tailored set of possible tags
-     * for editorial content, along with the capability to create hyperlinks
-     * to other DatoCMS records and embed custom DatoCMS blocks.
-     */
-  }
-  <StructuredText
-    data={page.structuredText}
-    blockComponents={/*
-     * If the structured text embeds any blocks, it's up to you to decide
-     * how to render them:
-     */
-    {
-      ImageBlockRecord: ImageBlock,
-      ImageGalleryBlockRecord: ImageGalleryBlock,
-      VideoBlockRecord: VideoBlock,
-    }}
-    linkToRecordComponents={/*
-     * If the structured text includes a link to another DatoCMS record,
-     * it's your decision to determine where the link should lead, or if
-     * you wish to customize its appearance:
-     */
-    {
-      PageRecord: PageLink,
-    }}
-    inlineRecordComponents={/*
-     * If the structured text includes a reference to another DatoCMS
-     * record, it's up to you to decide how to render them:
-     */
-    {
-      PageRecord: PageInline,
-    }}
-    nodeOverrides={/*
-     * You can also override the default rendering of certain nodes.
-     * In this case, we want to tweak the way headings (h1-h6) are rendered.
-     */ {
-      heading: HeadingWithAnchorLink,
-    }}
-  />
-  <footer>Published at {page._firstPublishedAt}</footer>
+<Layout additionalSeo={blog._seoMetaTags}>
+  <h1>{blog.title}</h1>
+  <h2>{blog.subtitle}</h2>
+  <footer>Published at {blog._firstPublishedAt}</footer>
 
   <DraftModeQueryListener query={query} />
 </Layout>
