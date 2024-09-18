@@ -3,6 +3,8 @@ import { graphql } from '~/lib/datocms/graphql';
 import Layout from '../layouts/Layout.astro';
 import { TagFragment, responsiveImageFragment } from '~/lib/datocms/commonFragments';
 import { executeQuery } from '~/lib/datocms/executeQuery';
+import activeCategories from '~/lib/activeCategories';
+
 import { StructuredText } from '@datocms/astro';
 
 import { HeadingWithAnchorLink } from '~/components/HeadingWithAnchorLink';
@@ -32,41 +34,41 @@ import { ResponsiveImageFragment } from '~/components/ResponsiveImage/fragments'
  *
  * Thanks to gql.tada, the result will be fully typed!
  */
- const query = graphql(
+const query = graphql(
   /* GraphQL */ `
-  query BasicPageQuery {
-    blog {
-      title
-      subtitle
-      _firstPublishedAt
+    query BasicPageQuery {
+      blog {
+        title
+        subtitle
+        _firstPublishedAt
 
-      _seoMetaTags {
-        ...TagFragment
-      }
-    }
-    allPosts(orderBy: date_DESC) {
-      title
-      slug
-      excerpt
-      date
-      id
-      coverImage {
-        responsiveImage(imgixParams: {fm: jpg, fit: crop, w: 2000, h: 1000 }) {
-          ...ResponsiveImageFragment
+        _seoMetaTags {
+          ...TagFragment
         }
       }
-      category{
-        name
+      allPosts(orderBy: date_DESC) {
+        title
         slug
+        excerpt
+        date
         id
-      }
-      tags{
-        name
-        slug
-        id
+        coverImage {
+          responsiveImage(imgixParams: { fm: jpg, fit: crop, w: 2000, h: 1000 }) {
+            ...ResponsiveImageFragment
+          }
+        }
+        category {
+          name
+          slug
+          id
+        }
+        tags {
+          name
+          slug
+          id
+        }
       }
     }
-  }
   `,
   [
     TagFragment,
@@ -78,56 +80,10 @@ import { ResponsiveImageFragment } from '~/components/ResponsiveImage/fragments'
   ],
 );
 
-// const query = graphql(
-//   /* GraphQL */ `
-//     query BasicPageQuery {
-//       blog {
-//         _seoMetaTags {
-//           ...TagFragment
-//         }
-//         title
-//         _firstPublishedAt
-//         structuredText {
-//           value
-//           blocks {
-//             ... on RecordInterface {
-//               id
-//               __typename
-//             }
-//             ... on ImageBlockRecord {
-//               ...ImageBlockFragment
-//             }
-//             ... on ImageGalleryBlockRecord {
-//               ...ImageGalleryBlockFragment
-//             }
-//             ... on VideoBlockRecord {
-//               ...VideoBlockFragment
-//             }
-//           }
-//           links {
-//             ... on RecordInterface {
-//               id
-//               __typename
-//             }
-//             ...PageLinkFragment
-//             ...PageInlineFragment
-//           }
-//         }
-//       }
-//     }
-//   `,
-//   [
-//     TagFragment,
-//     ImageBlockFragment,
-//     ImageGalleryBlockFragment,
-//     VideoBlockFragment,
-//     PageLinkFragment,
-//     PageInlineFragment,
-//   ],
-// );
-
 const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
 const { blog } = await executeQuery(query, { includeDrafts: draftModeEnabled });
+
+const categories = await activeCategories();
 
 if (!blog) {
   return new Response(null, {
@@ -138,8 +94,13 @@ if (!blog) {
 ---
 
 <Layout additionalSeo={blog._seoMetaTags}>
-  <h1>{blog.title}</h1>
+  <h1 class="text-6xl font-bold">{blog.title}</h1>
   <h2>{blog.subtitle}</h2>
+
+  <ul>
+    {categories.map((category) => <li>{category.name}</li>)}
+  </ul>
+
   <footer>Published at {blog._firstPublishedAt}</footer>
 
   <DraftModeQueryListener query={query} />

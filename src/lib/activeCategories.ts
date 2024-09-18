@@ -10,7 +10,7 @@ const query = graphql(`
       slug
     }
     allPosts {
-      category{
+      category {
         id
       }
     }
@@ -21,11 +21,11 @@ async function ActiveCategories(options = {}) {
   const result = await executeQuery(query, options);
   const { allPosts, allCategories } = result;
 
-  const categories = allCategories.map(cat => {
-    const matching = allPosts.filter(p => p.category.id == cat.id);
+  const categories = allCategories.map((cat) => {
+    const matching = allPosts.filter((p) => p.category.id == cat.id);
     return matching.length > 0 ? cat : null;
   });
-  const catsWithPosts = categories.filter(c => !!c);
+  const catsWithPosts = categories.filter((c) => !!c);
 
   return catsWithPosts;
 }
