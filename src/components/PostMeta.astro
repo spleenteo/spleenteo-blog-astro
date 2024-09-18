@@ -1,0 +1,48 @@
+---
+interface Props {
+  category: {
+    name: string;
+    slug?: string;
+  };
+  date: string;
+  tags: { name: string; slug?: string }[];
+}
+
+const { category, date, tags } = Astro.props;
+
+// Format the date
+const formattedDate = new Date(date).toLocaleDateString('it-IT', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<div class="text-sm text-gray-600 flex flex-wrap items-center">
+  <span>
+    Categoria:
+    <a href={`/categories/${category.slug}`} class="hover:underline ml-1">
+      {category.name}
+    </a>
+  </span>
+  <span class="mx-2">•</span>
+  <span>{formattedDate}</span>
+  {tags.length > 0 && (
+    <>
+      <span class="mx-2">•</span>
+      <span>
+        Tags:
+        {tags.map((tag, index) => (
+          <a
+            href={`/tags/${tag.slug}`}
+            class="hover:underline ml-1"
+            key={tag.name}
+          >
+            {tag.name}
+            {index < tags.length - 1 && ','}
+          </a>
+        ))}
+      </span>
+    </>
+  )}
+</div>

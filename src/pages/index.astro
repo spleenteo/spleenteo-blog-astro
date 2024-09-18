@@ -4,6 +4,7 @@ import Layout from '../layouts/Layout.astro';
 import { TagFragment, responsiveImageFragment } from '~/lib/datocms/commonFragments';
 import { executeQuery } from '~/lib/datocms/executeQuery';
 import activeCategories from '~/lib/activeCategories';
+import HeroPost from '../components/HeroPost.astro';
 
 import { StructuredText } from '@datocms/astro';
 
@@ -81,9 +82,13 @@ const query = graphql(
 );
 
 const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
-const { blog } = await executeQuery(query, { includeDrafts: draftModeEnabled });
+const { blog, allPosts } = await executeQuery(query, { includeDrafts: draftModeEnabled });
 
 const categories = await activeCategories();
+const heroPost = allPosts[0];
+const higlights = [allPosts[1], allPosts[2]];
+
+
 
 if (!blog) {
   return new Response(null, {
@@ -96,6 +101,24 @@ if (!blog) {
 <Layout additionalSeo={blog._seoMetaTags}>
   <ul>
     {categories.map((category) => <li>{category.name}</li>)}
+  </ul>
+  <hr/>
+
+  {heroPost && (
+    <HeroPost
+      title={heroPost.title}
+      coverImage={heroPost.coverImage}
+      date={heroPost.date}
+      slug={heroPost.slug}
+      excerpt={heroPost.excerpt}
+      category={heroPost.category}
+      tags={heroPost.tags}
+    />
+  )}
+
+
+  <ul>
+    {allPosts.map((post) => <li>{post.title}</li>)}
   </ul>
 
   <footer>Published at {blog._firstPublishedAt}</footer>

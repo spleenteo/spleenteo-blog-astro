@@ -1,0 +1,21 @@
+---
+interface Props {
+  title: string;
+  responsiveImage: {
+    src: string;
+    alt?: string;
+  };
+  slug: string;
+}
+
+const { title, responsiveImage, slug } = Astro.props;
+---
+
+<a href={`/posts/${slug}`}>
+  <img
+    src={responsiveImage.src}
+    alt={responsiveImage.alt || `Cover Image for ${title}`}
+    class="w-full h-auto"
+    loading="lazy"
+  />
+</a>
