@@ -1,21 +1,19 @@
 ---
+import DateComponent from './FormattedDate.astro';
+
 interface Props {
   category: {
     name: string;
-    slug?: string;
+    slug: string;
   };
   date: string;
-  tags: { name: string; slug?: string }[];
+  tags: {
+    name: string;
+    slug: string;
+  }[];
 }
 
 const { category, date, tags } = Astro.props;
-
-// Format the date
-const formattedDate = new Date(date).toLocaleDateString('it-IT', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
 ---
 
 <div class="text-sm text-gray-600 flex flex-wrap items-center">
@@ -26,7 +24,7 @@ const formattedDate = new Date(date).toLocaleDateString('it-IT', {
     </a>
   </span>
   <span class="mx-2">•</span>
-  <span>{formattedDate}</span>
+  <DateComponent dateString={date} />
   {tags.length > 0 && (
     <>
       <span class="mx-2">•</span>
@@ -36,7 +34,7 @@ const formattedDate = new Date(date).toLocaleDateString('it-IT', {
           <a
             href={`/tags/${tag.slug}`}
             class="hover:underline ml-1"
-            key={tag.name}
+            key={tag.slug}
           >
             {tag.name}
             {index < tags.length - 1 && ','}

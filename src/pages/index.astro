@@ -5,6 +5,7 @@ import { TagFragment, responsiveImageFragment } from '~/lib/datocms/commonFragme
 import { executeQuery } from '~/lib/datocms/executeQuery';
 import activeCategories from '~/lib/activeCategories';
 import HeroPost from '../components/HeroPost.astro';
+import PostPreview from '../components/PostPreview.astro';
 
 import { StructuredText } from '@datocms/astro';
 
@@ -88,8 +89,6 @@ const categories = await activeCategories();
 const heroPost = allPosts[0];
 const higlights = [allPosts[1], allPosts[2]];
 
-
-
 if (!blog) {
   return new Response(null, {
     status: 404,
@@ -102,21 +101,44 @@ if (!blog) {
   <ul>
     {categories.map((category) => <li>{category.name}</li>)}
   </ul>
+  <hr />
+
+  {
+    heroPost && (
+      <HeroPost
+        title={heroPost.title}
+        coverImage={heroPost.coverImage}
+        date={heroPost.date}
+        slug={heroPost.slug}
+        excerpt={heroPost.excerpt}
+        category={heroPost.category}
+        tags={heroPost.tags}
+      />
+    )
+  }
   <hr/>
-
-  {heroPost && (
-    <HeroPost
-      title={heroPost.title}
-      coverImage={heroPost.coverImage}
-      date={heroPost.date}
-      slug={heroPost.slug}
-      excerpt={heroPost.excerpt}
-      category={heroPost.category}
-      tags={heroPost.tags}
-    />
-  )}
-
-
+  <h3>Highlights</h3>
+  <ul>
+    {higlights.map((p) => <li>{p.title}</li>)}
+  </ul>
+  <div class="mb-32">
+    {higlights.map(post => (
+      <PostPreview
+        key={post.slug}
+        title={post.title}
+        coverImage={post.coverImage}
+        date={post.date}
+        author={post.author}
+        slug={post.slug}
+        excerpt={post.excerpt}
+        category={post.category}
+        tags={post.tags}
+      />
+    ))}
+  </div>
+  
+  <hr/>
+  <h3>All posts</h3>
   <ul>
     {allPosts.map((post) => <li>{post.title}</li>)}
   </ul>
