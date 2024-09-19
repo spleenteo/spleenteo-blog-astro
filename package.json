@@ -40,12 +40,22 @@
   },
   "devDependencies": {
     "@astrojs/ts-plugin": "^1.9.2",
+    "@eslint/js": "^9.10.0",
     "@types/jsdom": "^21.1.7",
     "@types/jsonwebtoken": "^9.0.6",
+    "@typescript-eslint/eslint-plugin": "^8.6.0",
+    "@typescript-eslint/parser": "^8.6.0",
+    "astro-eslint-parser": "^1.0.3",
     "dotenv-cli": "^7.4.2",
+    "eslint": "^9.10.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-astro": "^1.2.4",
+    "eslint-plugin-prettier": "^5.2.1",
+    "globals": "^15.9.0",
     "prettier": "^3.3.3",
     "prettier-plugin-astro": "^0.14.1",
-    "simple-git-hooks": "^2.11.1"
+    "simple-git-hooks": "^2.11.1",
+    "typescript-eslint": "^8.6.0"
   },
   "simple-git-hooks": {
     "pre-commit": "npm run format"
