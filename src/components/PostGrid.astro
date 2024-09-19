@@ -32,17 +32,20 @@ interface Props {
 
 const { posts } = Astro.props;
 ---
+
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 md:gap-16 gap-y-20 mb-32">
-  {posts.map((post) => (
-    <PostPreview
-      title={post.title}
-      coverImage={post.coverImage}
-      date={post.date}
-      author={post.author}
-      slug={post.slug}
-      excerpt={post.excerpt}
-      category={post.category}
-      tags={post.tags}
-    />
-  ))}
+  {
+    posts.map((post) => (
+      <PostPreview
+        title={post.title}
+        coverImage={post.coverImage}
+        date={post.date}
+        author={post.author}
+        slug={post.slug}
+        excerpt={post.excerpt}
+        category={post.category}
+        tags={post.tags}
+      />
+    ))
+  }
 </div>

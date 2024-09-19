@@ -36,21 +36,20 @@ interface Props {
 
 const { posts, categories } = Astro.props;
 ---
+
 <section>
-  <h2 class="mb-8 text-6xl md:text-7xl font-bold tracking-tighter leading-tight">
-    Altre amenità
-  </h2>
+  <h2 class="mb-8 text-6xl md:text-7xl font-bold tracking-tighter leading-tight">Altre amenità</h2>
 
   <ul class="flex flex-row flex-wrap my-8">
-    {categories.map((cat) => (
-      <li
-        class="mb-3 mr-3 rounded-md bg-green-500 text-white flex items-center justify-center md:text-lg lg:text-2xl font-bold rounded-t-xl p-2 px-4"
-      >
-        <a href={`/categories/${cat.slug}`} class="hover:underline">
-          {cat.name}
-        </a>
-      </li>
-    ))}
+    {
+      categories.map((cat) => (
+        <li class="mb-3 mr-3 rounded-md bg-green-500 text-white flex items-center justify-center md:text-lg lg:text-2xl font-bold rounded-t-xl p-2 px-4">
+          <a href={`/categories/${cat.slug}`} class="hover:underline">
+            {cat.name}
+          </a>
+        </li>
+      ))
+    }
   </ul>
 
   <PostGrid posts={posts} />
