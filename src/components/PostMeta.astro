@@ -25,22 +25,20 @@ const { category, date, tags } = Astro.props;
   </span>
   <span class="mx-2">•</span>
   <DateComponent dateString={date} />
-  {tags.length > 0 && (
-    <>
-      <span class="mx-2">•</span>
-      <span>
-        Tags:
-        {tags.map((tag, index) => (
-          <a
-            href={`/tags/${tag.slug}`}
-            class="hover:underline ml-1"
-            key={tag.slug}
-          >
-            {tag.name}
-            {index < tags.length - 1 && ','}
-          </a>
-        ))}
-      </span>
-    </>
-  )}
+  {
+    tags.length > 0 && (
+      <>
+        <span class="mx-2">•</span>
+        <span>
+          Tags:
+          {tags.map((tag, index) => (
+            <a href={`/tags/${tag.slug}`} class="hover:underline ml-1" key={tag.slug}>
+              {tag.name}
+              {index < tags.length - 1 && ','}
+            </a>
+          ))}
+        </span>
+      </>
+    )
+  }
 </div>

@@ -1,0 +1,48 @@
+---
+import PostPreview from './PostPreview.astro';
+
+interface Post {
+  title: string;
+  coverImage: {
+    responsiveImage: {
+      src: string;
+      alt?: string;
+    };
+  };
+  date: string;
+  author?: {
+    name: string;
+    picture: string;
+  };
+  slug: string;
+  excerpt: string;
+  category: {
+    name: string;
+    slug: string;
+  };
+  tags: {
+    name: string;
+    slug: string;
+  }[];
+}
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+---
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 md:gap-16 gap-y-20 mb-32">
+  {posts.map((post) => (
+    <PostPreview
+      title={post.title}
+      coverImage={post.coverImage}
+      date={post.date}
+      author={post.author}
+      slug={post.slug}
+      excerpt={post.excerpt}
+      category={post.category}
+      tags={post.tags}
+    />
+  ))}
+</div>

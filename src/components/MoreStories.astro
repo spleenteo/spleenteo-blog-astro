@@ -1,0 +1,57 @@
+---
+import PostGrid from './PostGrid.astro';
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface Post {
+  title: string;
+  coverImage: {
+    responsiveImage: {
+      src: string;
+      alt?: string;
+    };
+  };
+  date: string;
+  author?: {
+    name: string;
+    picture: string;
+  };
+  slug: string;
+  excerpt: string;
+  category: Category;
+  tags: {
+    name: string;
+    slug: string;
+  }[];
+}
+
+interface Props {
+  posts: Post[];
+  categories: Category[];
+}
+
+const { posts, categories } = Astro.props;
+---
+<section>
+  <h2 class="mb-8 text-6xl md:text-7xl font-bold tracking-tighter leading-tight">
+    Altre amenità
+  </h2>
+
+  <ul class="flex flex-row flex-wrap my-8">
+    {categories.map((cat) => (
+      <li
+        class="mb-3 mr-3 rounded-md bg-green-500 text-white flex items-center justify-center md:text-lg lg:text-2xl font-bold rounded-t-xl p-2 px-4"
+      >
+        <a href={`/categories/${cat.slug}`} class="hover:underline">
+          {cat.name}
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <PostGrid posts={posts} />
+</section>
