@@ -1,0 +1,77 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { graphql } from '~/lib/datocms/graphql';
+import { executeQuery } from '~/lib/datocms/executeQuery';
+import { TagFragment } from '~/lib/datocms/commonFragments';
+import activeCategories from '~/lib/activeCategories';
+import activeTags from '~/lib/activeTags';
+
+import CategoryAbstract from '../components/CategoryAbstract.astro';
+import PostTitle from '~/components/PostTitle.astro';
+
+const query = graphql(
+  /* GraphQL */ `
+    query CategoriesPageQuery {
+      site: _site {
+        favicon: faviconMetaTags {
+          ...TagFragment
+        }
+      }
+      categoryPage {
+        title
+        seo: _seoMetaTags {
+          ...TagFragment
+        }
+      }
+    }
+  `,
+  [TagFragment],
+);
+
+const draftModeEnabled = false; // O utilizza la tua logica per il draft mode
+const { site, categoryPage } = await executeQuery(query, { includeDrafts: draftModeEnabled });
+
+const categories = await activeCategories();
+const tags = await activeTags();
+
+if (!categoryPage) {
+  return new Response(null, {
+    status: 404,
+    statusText: 'Not found',
+  });
+}
+---
+
+<Layout additionalSeo={categoryPage.seo}>
+  <div class="container mx-auto px-4">
+    <article>
+      <PostTitle>{categoryPage.title}</PostTitle>
+      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-8 md:gap-x-2">
+        <div class="col-span-3 md:col-span-2 lg:col-span-6 md:mr-8">
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {categories.map((cat) => (
+              <CategoryAbstract
+                key={cat.slug}
+                name={cat.name}
+                description={cat.description}
+                slug={cat.slug}
+              />
+            ))}
+          </div>
+        </div>
+        <div class="col-span-3 md:col-span-1 lg:col-span-2 bg-gray-100 p-8 rounded">
+          <h2 class="mb-8 text-4sm md:text-2xl font-bold tracking-tighter leading-tight">Parlo anche di:</h2>
+          <ul class="flex flex-wrap my-8">
+            {tags.map((tag) => (
+              <li key={tag.name} class="mb-3 mr-3 rounded-md bg-green-500 text-white flex font-bold p-1 px-4">
+                <a href={`/tags/${tag.slug}`} class="hover:underline">
+                  {tag.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </article>
+  </div>
+</Layout>

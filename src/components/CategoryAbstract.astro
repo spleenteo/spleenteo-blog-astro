@@ -1,0 +1,25 @@
+---
+import createDOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
+
+const window = (new JSDOM('')).window;
+const DOMPurify = createDOMPurify(window);
+
+interface Props {
+  name: string;
+  description?: string;
+  slug: string;
+}
+
+const { name, description, slug } = Astro.props;
+const sanitizedDescription = description ? DOMPurify.sanitize(description) : null;
+---
+
+<div class="category-abstract p-4 border rounded-lg">
+  <h3 class="text-xl font-bold mb-2">
+    <a href={`/categories/${slug}`} class="hover:underline">
+      {name}
+    </a>
+  </h3>
+  <p class="text-gray-700" set:html={sanitizedDescription}></p>
+</div>
