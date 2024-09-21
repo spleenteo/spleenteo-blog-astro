@@ -1,0 +1,48 @@
+---
+import { StructuredText } from '@datocms/astro';
+import { PageInline } from '~/components/inlineRecord/PageInline.astro';
+import { PageLink } from '~/components/linkToRecord/PageLink.astro';
+
+
+import { HeadingWithAnchorLink } from '~/components/HeadingWithAnchorLink.astro';
+import { VideoBlock } from '~/components/blocks/VideoBlock.astro';
+import { ImageBlock } from '~/components/blocks/ImageBlock.astro';
+import { ImageGalleryBlock } from '~/components/blocks/ImageGalleryBlock.astro';
+import ResponsiveImage from '../components/ResponsiveImage.astro';
+
+import type {
+  StructuredTextGraphQlResponse,
+  RenderInlineRecordContext,
+  RenderLinkToRecordContext,
+  RenderBlockContext,
+} from '@datocms/structured-text-types';
+
+interface PostBodyProps {
+  content: StructuredTextGraphQlResponse;
+}
+
+const { content } = Astro.props as PostBodyProps;
+
+// Define the rendering functions
+const renderLinkToRecord = ({ record, children }: RenderLinkToRecordContext) => {
+      return null;
+};
+
+const renderInlineRecord = ({ record }: RenderInlineRecordContext) => {
+  return null;
+};
+
+const renderBlock = ({ record }: RenderBlockContext) => {
+  return null;
+};
+---
+<div class="max-w-2xl mx-auto">
+  <div class="prose prose-lg prose-green">
+    <StructuredText
+      data={content}
+      renderLinkToRecord={renderLinkToRecord}
+      renderInlineRecord={renderInlineRecord}
+      renderBlock={renderBlock}
+    />
+  </div>
+</div>
