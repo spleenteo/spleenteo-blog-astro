@@ -1,0 +1,129 @@
+---
+import Debugger from '~/components/Debugger.astro';
+import Layout from '~/layouts/Layout.astro';
+import { graphql } from '~/lib/datocms/graphql';
+import { executeQuery } from '~/lib/datocms/executeQuery';
+import PostGrid from '~/components/PostGrid.astro';
+import PostTitle from '~/components/PostTitle.astro';
+import { isDraftModeEnabled } from '~/lib/draftMode';
+import { TagFragment } from '~/lib/datocms/commonFragments';
+import { ResponsiveImageFragment } from '~/components/ResponsiveImage/fragments';
+import createDOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
+
+const window = new JSDOM('').window;
+const DOMPurify = createDOMPurify(window);
+const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
+
+// Funzione per generare le rotte statiche
+export async function getStaticPaths() {
+  const pathQuery = graphql(`{ allCategories { id slug } }`);
+  const { allCategories } = await executeQuery(pathQuery);
+
+  return allCategories.map((category) => ({
+    params: { slug: category.slug },
+    props: { categoryId: category.id, categorySlug: category.slug },
+  }));
+}
+
+// Funzione per trovare l'ID della categoria basandosi sullo slug
+async function getCategoryIdBySlug(slug) {
+  const pathQuery = graphql(`{ allCategories { id slug } }`);
+  const { allCategories } = await executeQuery(pathQuery);
+
+  const category = allCategories.find(category => category.slug === slug);
+  return category ? category.id : null;
+}
+
+// Ottieni lo slug dai parametri
+const { slug } = Astro.params;
+
+// Recupera l'ID della categoria basandosi sullo slug
+const categoryId = await getCategoryIdBySlug(slug);
+
+// Se l'ID della categoria non esiste, restituisci una pagina 404
+if (!categoryId) {
+  return new Response(null, {
+    status: 404,
+    statusText: 'Not found',
+  });
+}
+
+// Definisci la query per recuperare i dati della categoria e i post
+const query = graphql(
+  /* GraphQL */ `
+    query CategoryById($id: ItemId) {
+      site: _site {
+        favicon: faviconMetaTags {
+          ...TagFragment
+        }
+      }
+      category(filter: { id: { eq: $id } }) {
+        name
+        description
+        slug
+        seo: _seoMetaTags {
+          ...TagFragment
+        }
+      }
+      posts: allPosts(orderBy: date_DESC, filter: { category: { eq: $id } }) {
+        id
+        title
+        excerpt
+        slug
+        date
+        category {
+          name
+          slug
+        }
+        tags {
+          name
+          slug
+          id
+        }
+        coverImage {
+          responsiveImage(imgixParams: {fm: jpg, fit: crop, w: 800, h: 800 }) {
+            ...ResponsiveImageFragment
+          }
+        }
+      }
+    }
+  `,
+  [TagFragment, ResponsiveImageFragment]
+);
+
+// Esegui la query passando l'id della categoria come variabile
+const { site, category, posts } = await executeQuery(query, {
+  variables: { id: categoryId },
+  includeDrafts: draftModeEnabled,
+});
+
+// Se la categoria non esiste, restituisci una pagina 404
+if (!category) {
+  return new Response(null, {
+    status: 404,
+    statusText: 'Not found',
+  });
+}
+
+// Combina i meta tag per il SEO
+const metaTags = [...category.seo, ...site.favicon];
+
+// Sanitizza la descrizione se necessario
+const sanitizedDescription = category.description
+  ? DOMPurify.sanitize(category.description)
+  : null;
+
+console.log('Category name:', category.name);
+
+---
+<Layout additionalSeo={metaTags}>
+
+  <div class="container mx-auto px-4">
+    <PostTitle title={category.name} />
+    {sanitizedDescription && (
+      <div class="mb-10 md:text-1xl lg:text-2xl md:leading-relaxed lg:w-2/3 xl:w-1/2" set:html={sanitizedDescription}></div>
+    )}
+    <PostGrid posts={posts} />
+  </div>
+</Layout>

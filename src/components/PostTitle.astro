@@ -1,11 +1,13 @@
 ---
 interface Props {
-  children: string | AstroComponent;
+  title: string | AstroComponent;
 }
 
-const { children } = Astro.props;
+const { title } = Astro.props;
 ---
 
-<h1 class="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight md:leading-none mb-12 text-center md:text-left">
-  {children}
+<h1
+  class="text-6xl md:text-7xl lg:text-8xl font-bold tracking-tighter leading-tight md:leading-none mb-12 text-center md:text-left"
+>
+  {title}
 </h1>

@@ -1,0 +1,14 @@
+---
+interface DebuggerProps {
+  data: any; // Puoi sostituire `any` con il tipo specifico dei dati se conosci la struttura
+}
+const { data } = Astro.props;
+---
+<div>
+  <pre>{JSON.stringify(data, null, 2)}</pre>
+</div>
+
+<script>
+
+  console.log('Debug Data:', data);
+</script>
