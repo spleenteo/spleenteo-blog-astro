@@ -1,0 +1,32 @@
+---
+import CoverImage from '../components/CoverImage.astro';
+import PostTitle from '../components/PostTitle.astro';
+
+interface ResponsiveImage {
+  title?: string;
+  // Add other properties of responsiveImage as needed
+}
+
+interface CoverImageProps {
+  responsiveImage: ResponsiveImage;
+}
+
+interface Props {
+  title: string;
+  coverImage: CoverImageProps;
+}
+
+const { title, coverImage } = Astro.props as Props;
+---
+<PostTitle title={title} />
+<div class="mb-8 md:mb-16 -mx-5 sm:mx-0">
+  <CoverImage
+    title={title}
+    responsiveImage={coverImage.responsiveImage}
+  />
+  {coverImage.responsiveImage.title && (
+    <p class="text-gray-500 text-sm text-right italic mt-1">
+      {coverImage.responsiveImage.title}
+    </p>
+  )}
+</div>

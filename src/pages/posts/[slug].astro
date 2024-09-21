@@ -1,0 +1,202 @@
+---
+import Layout from '~/layouts/Layout.astro';
+import { graphql } from '~/lib/datocms/graphql';
+import { executeQuery } from '~/lib/datocms/executeQuery';
+import { isDraftModeEnabled } from '~/lib/draftMode';
+import { DraftModeQueryListener } from '~/components/DraftModeQueryListener';
+import PostHeader from '~/components/PostHeader.astro';
+import PostBody from '~/components/PostBody.astro';
+import PostMeta from '~/components/PostMeta.astro';
+import MoreStories from '~/components/MoreStories.astro';
+import CategoryAbstract from '~/components/CategoryAbstract.astro';
+import SiteNav from '~/components/SiteNav.astro';
+
+import { StructuredText } from '@datocms/astro';
+import { HeadingWithAnchorLink } from '~/components/HeadingWithAnchorLink.astro';
+import { PageInline } from '~/components/inlineRecord/PageInline.astro';
+import { PageLink } from '~/components/linkToRecord/PageLink.astro';
+import { VideoBlock } from '~/components/blocks/VideoBlock.astro';
+import { ImageBlock } from '~/components/blocks/ImageBlock.astro';
+import { ImageGalleryBlock } from '~/components/blocks/ImageGalleryBlock.astro';
+
+import { TagFragment } from '~/lib/datocms/commonFragments';
+import { ResponsiveImageFragment } from '~/components/ResponsiveImage/fragments';
+import { MetaTags } from '@datocms/astro';
+
+import createDOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
+
+const window = new JSDOM('').window;
+const DOMPurify = createDOMPurify(window);
+
+// Define the interface for static paths
+interface StaticPath {
+  params: {
+    slug: string;
+  };
+}
+
+// Function to generate static paths
+export async function getStaticPaths(): Promise<StaticPath[]> {
+  const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
+  const query = graphql(
+    /* GraphQL */ `
+      {
+        allPosts {
+          slug
+        }
+      }
+    `
+  );
+
+  const { allPosts } = await executeQuery<{ allPosts: { slug: string }[] }>(query, {
+    includeDrafts: draftModeEnabled,
+  });
+
+  return allPosts.map((post) => ({
+    params: { slug: post.slug },
+  }));
+}
+
+// Get the slug from params
+const { slug } = Astro.params;
+const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
+
+// Define the query to fetch post data
+const query = graphql(
+  /* GraphQL */ `
+    query PostBySlug($slug: String!) {
+      site: _site {
+        favicon: faviconMetaTags {
+          ...TagFragment
+        }
+      }
+      post(filter: { slug: { eq: $slug } }) {
+        seo: _seoMetaTags {
+          ...TagFragment
+        }
+        title
+        slug
+        tags {
+          name
+          id
+          slug
+        }
+        content {
+          value
+          blocks {
+            __typename
+            ... on ImageBlockRecord {
+              id
+              image {
+                responsiveImage(imgixParams: { fm: jpg, fit: clip, w: 1000, h: 600 }) {
+                  ...ResponsiveImageFragment
+                }
+              }
+            }
+            ... on VideoBlockRecord {
+              id
+              video {
+                url
+                thumbnailUrl
+              }
+            }
+            # Include other block types as needed
+          }
+          links {
+            __typename
+            ... on PostRecord {
+              id
+              slug
+              title
+            }
+            ... on CategoryRecord {
+              id
+              slug
+              name
+            }
+          }
+        }
+        date
+        coverImage {
+          responsiveImage(imgixParams: { fm: jpg, fit: crop, w: 2000, h: 1000 }) {
+            ...ResponsiveImageFragment
+          }
+        }
+        category {
+          name
+          description
+          slug
+        }
+      }
+      morePosts: allPosts(
+        orderBy: date_DESC
+        first: 2
+        filter: { slug: { neq: $slug } }
+      ) {
+        title
+        slug
+        excerpt
+        date
+        coverImage {
+          responsiveImage(imgixParams: { fm: jpg, fit: crop, w: 2000, h: 1000 }) {
+            ...ResponsiveImageFragment
+          }
+        }
+        category {
+          name
+          slug
+        }
+        tags {
+          name
+          slug
+        }
+      }
+    }
+  `,
+  [TagFragment, ResponsiveImageFragment]
+);
+
+// Execute the query
+const { site, post, morePosts } = await executeQuery(query, {
+  variables: { slug },
+  includeDrafts: draftModeEnabled,
+});
+
+// If the post does not exist, return a 404 page
+if (!post) {
+  return new Response(null, {
+    status: 404,
+    statusText: 'Not found',
+  });
+}
+
+// Combine meta tags for SEO
+const metaTags = [...post.seo, ...site.favicon];
+
+// Sanitize the category description if necessary
+const sanitizedCategoryDescription = post.category.description
+  ? DOMPurify.sanitize(post.category.description)
+  : null;
+---
+
+<Layout additionalSeo={metaTags}>
+  <article>
+    <PostHeader title={post.title} coverImage={post.coverImage} />
+    <div class="mb-8 max-w-2xl mx-auto">
+      <PostMeta category={post.category} date={post.date} tags={post.tags} />
+    </div>
+    
+  </article>
+
+  <hr />
+
+  <CategoryAbstract
+    name={post.category.name}
+    description={sanitizedCategoryDescription}
+    slug={post.category.slug}
+  />
+
+  <hr />
+
+</Layout>
