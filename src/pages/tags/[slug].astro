@@ -22,13 +22,13 @@ const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
 // Definisci la query utilizzando la relazione inversa
 const query = graphql(
   /* GraphQL */ `
-    query CategoryBySlug($slug: String!) {
+    query TagBySlug($slug: String!) {
       site: _site {
         favicon: faviconMetaTags {
           ...TagFragment
         }
       }
-      category(filter: { slug: { eq: $slug } }) {
+      tag(filter: { slug: { eq: $slug } }) {
         name
         description
         slug
@@ -63,13 +63,13 @@ const query = graphql(
 );
 
 // Esegui la query
-const { site, category } = await executeQuery(query, {
+const { site, tag } = await executeQuery(query, {
   variables: { slug },
   includeDrafts: draftModeEnabled,
 });
 
 // Se la categoria non esiste, restituisci una pagina 404
-if (!category) {
+if (!tag) {
   return new Response(null, {
     status: 404,
     statusText: 'Not found',
@@ -77,7 +77,7 @@ if (!category) {
 }
 
 // Estrai i post dalla relazione inversa
-const posts = category.posts;
+const posts = tag.posts;
 
 // Verifica se ci sono post
 if (!posts || posts.length === 0) {
@@ -85,15 +85,15 @@ if (!posts || posts.length === 0) {
 }
 
 // Combina i meta tag per il SEO
-const metaTags = [...category.seo, ...site.favicon];
+const metaTags = [...tag.seo, ...site.favicon];
 
 // Sanitizza la descrizione se necessario
-const sanitizedDescription = category.description ? DOMPurify.sanitize(category.description) : null;
+const sanitizedDescription = tag.description ? DOMPurify.sanitize(tag.description) : null;
 ---
 
 <Layout additionalSeo={metaTags}>
   <div class="container mx-auto px-4">
-    <PostTitle title={category.name} />
+    <PostTitle title={tag.name} />
     {
       sanitizedDescription && (
         <div
