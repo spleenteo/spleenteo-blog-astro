@@ -16,7 +16,13 @@ const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
 
 // Ottieni lo slug dai parametri
-const { slug } = Astro.params;
+const { slug } = Astro.params || {};
+if (!slug) {
+  return new Response(null, {
+    status: 400,
+    statusText: 'Bad Request',
+  });
+}
 const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
 
 // Definisci la query utilizzando la relazione inversa
@@ -62,11 +68,37 @@ const query = graphql(
   [TagFragment, ResponsiveImageFragment],
 );
 
-// Esegui la query
-const { site, category } = await executeQuery(query, {
+type Category = {
+  name: string;
+  description: string;
+  slug: string;
+  seo: any[];
+  posts: {
+    id: string;
+    title: string;
+    excerpt: string;
+    slug: string;
+    date: string;
+    category: {
+      name: string;
+      slug: string;
+    };
+    tags: {
+      name: string;
+      slug: string;
+      id: string;
+    }[];
+    coverImage: {
+      responsiveImage: any;
+    };
+  }[];
+};
+
+const result = await executeQuery(query, {
   variables: { slug },
   includeDrafts: draftModeEnabled,
 });
+const { site, category } = result as { site: any; category: Category | null };
 
 // Se la categoria non esiste, restituisci una pagina 404
 if (!category) {

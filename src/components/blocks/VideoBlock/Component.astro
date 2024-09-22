@@ -3,10 +3,14 @@ import { type FragmentOf, readFragment } from '~/lib/datocms/graphql';
 import { VideoBlockFragment } from './fragments';
 import { YouTube } from 'astro-embed';
 
+interface Props {
+  block: FragmentOf<typeof VideoBlockFragment>;
+}
+
 const { block } = Astro.props;
 
 // Read unmasked block from fragment
-const unmaskedBlock = readFragment(VideoBlockFragment, block);
+const unmaskedBlock = readFragment(VideoBlockFragment, block) as { video: { url: string } };
 ---
 
 <figure>
