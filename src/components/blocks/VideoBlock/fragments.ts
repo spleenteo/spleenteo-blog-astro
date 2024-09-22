@@ -15,14 +15,12 @@ import { VideoPlayerFragment } from '~/components/VideoPlayer/fragments';
  * Learn more: https://gql-tada.0no.co/guides/fragment-colocation
  */
 
-export const VideoBlockFragment = graphql(
-  /* GraphQL */ `
-    fragment VideoBlockFragment on VideoBlockRecord {
-      id
-      video {
-        url
-        thumbnailUrl
-      }
+export const VideoBlockFragment = graphql(/* GraphQL */ `
+  fragment VideoBlockFragment on VideoBlockRecord {
+    id
+    video {
+      url
+      thumbnailUrl
     }
-  `,
-);
+  }
+`);

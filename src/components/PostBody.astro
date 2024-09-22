@@ -21,7 +21,6 @@ interface PostBodyProps {
 }
 
 const { content } = Astro.props as PostBodyProps;
-
 ---
 
 <div class="max-w-2xl mx-auto">
@@ -29,7 +28,9 @@ const { content } = Astro.props as PostBodyProps;
     <StructuredText
       data={content}
       blockComponents={{
-        ImageBlockRecord: ImageBlock, VideoBlockRecord: VideoBlock, ImageGalleryBlockRecord: ImageGalleryBlock
+        ImageBlockRecord: ImageBlock,
+        VideoBlockRecord: VideoBlock,
+        ImageGalleryBlockRecord: ImageGalleryBlock,
       }}
     />
   </div>

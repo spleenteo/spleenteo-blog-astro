@@ -69,7 +69,6 @@ export async function getStaticPaths(): Promise<StaticPath[]> {
   }));
 }
 
-
 // Define the query to fetch post data
 const query = graphql(
   /* GraphQL */ `
@@ -151,19 +150,13 @@ const query = graphql(
       }
     }
   `,
-  [
-    TagFragment,
-    ResponsiveImageFragment,
-    ImageBlockFragment,
-    VideoBlockFragment,
-  ],
+  [TagFragment, ResponsiveImageFragment, ImageBlockFragment, VideoBlockFragment],
 );
 const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
-const { site, post } = await executeQuery(query, {   
+const { site, post } = await executeQuery(query, {
   variables: { slug },
-  includeDrafts: draftModeEnabled 
+  includeDrafts: draftModeEnabled,
 });
-
 
 // If the post does not exist, return a 404 page
 if (!post) {
