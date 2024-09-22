@@ -36,7 +36,7 @@ interface QueryResult {
 }
 
 async function ActiveCategories(options = {}) {
-  const result = await executeQuery(query, options) as QueryResult;
+  const result = (await executeQuery(query, options)) as QueryResult;
   const { allPosts, allCategories } = result;
 
   const categories = allCategories.map((cat: { id: string }) => {

@@ -6,6 +6,8 @@ import { executeQuery } from '~/lib/datocms/executeQuery';
 import { isDraftModeEnabled } from '~/lib/draftMode';
 import { TagFragment } from '~/lib/datocms/commonFragments';
 import { ResponsiveImageFragment } from '~/components/ResponsiveImage/fragments';
+import { VideoBlockFragment } from '~/components/blocks/VideoBlock/fragments';
+import { ImageBlockFragment } from '~/components/blocks/ImageBlock/fragments';
 
 import PostHeader from '~/components/PostHeader.astro';
 import PostBody from '~/components/PostBody.astro';
@@ -13,26 +15,6 @@ import PostMeta from '~/components/PostMeta.astro';
 import CategoryAbstract from '~/components/CategoryAbstract.astro';
 
 import { DraftModeQueryListener } from '~/components/DraftModeQueryListener';
-
-import { StructuredText } from '@datocms/astro';
-import { HeadingWithAnchorLink } from '~/components/HeadingWithAnchorLink';
-
-import { PageInline } from '~/components/inlineRecord/PageInline';
-import { PageInlineFragment } from '~/components/inlineRecord/PageInline/fragments';
-
-import { PageLink } from '~/components/linkToRecord/PageLink';
-import { PageLinkFragment } from '~/components/linkToRecord/PageLink/fragments';
-
-import { VideoBlock } from '~/components/blocks/VideoBlock';
-import { VideoBlockFragment } from '~/components/blocks/VideoBlock/fragments';
-
-import { ImageBlock } from '~/components/blocks/ImageBlock';
-import { ImageBlockFragment } from '~/components/blocks/ImageBlock/fragments';
-
-import { ImageGalleryBlock } from '~/components/blocks/ImageGalleryBlock';
-import { ImageGalleryBlockFragment } from '~/components/blocks/ImageGalleryBlock/fragments';
-
-import { MetaTags } from '@datocms/astro';
 import MoreStories from '~/components/MoreStories.astro';
 
 import createDOMPurify from 'dompurify';
@@ -41,33 +23,7 @@ import { JSDOM } from 'jsdom';
 const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
 
-// // Define the interface for static paths
-// interface StaticPath {
-//   params: {
-//     slug: string;
-//   };
-// }
 const { slug } = Astro.params;
-
-// Function to generate static paths
-export async function getStaticPaths(): Promise<StaticPath[]> {
-  const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
-  const query = graphql(/* GraphQL */ `
-    {
-      allPosts {
-        slug
-      }
-    }
-  `);
-
-  const { allPosts } = await executeQuery<{ allPosts: { slug: string }[] }>(query, {
-    includeDrafts: draftModeEnabled,
-  });
-
-  return allPosts.map((post) => ({
-    params: { slug: post.slug },
-  }));
-}
 
 // Define the query to fetch post data
 const query = graphql(
