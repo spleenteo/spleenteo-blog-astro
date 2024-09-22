@@ -1,4 +1,5 @@
-import { graphql } from 'gql.tada';
+// import { graphql } from 'gql.tada';
+import { graphql } from '~/lib/datocms/graphql';
 import { VideoPlayerFragment } from '~/components/VideoPlayer/fragments';
 
 /**
@@ -17,11 +18,11 @@ import { VideoPlayerFragment } from '~/components/VideoPlayer/fragments';
 export const VideoBlockFragment = graphql(
   /* GraphQL */ `
     fragment VideoBlockFragment on VideoBlockRecord {
-      asset {
-        title
-        ...VideoPlayerFragment
+      id
+      video {
+        url
+        thumbnailUrl
       }
     }
   `,
-  [VideoPlayerFragment],
 );

@@ -1,27 +1,39 @@
 ---
 import Layout from '~/layouts/Layout.astro';
+
 import { graphql } from '~/lib/datocms/graphql';
 import { executeQuery } from '~/lib/datocms/executeQuery';
 import { isDraftModeEnabled } from '~/lib/draftMode';
-import { DraftModeQueryListener } from '~/components/DraftModeQueryListener';
+import { TagFragment } from '~/lib/datocms/commonFragments';
+import { ResponsiveImageFragment } from '~/components/ResponsiveImage/fragments';
+
 import PostHeader from '~/components/PostHeader.astro';
 import PostBody from '~/components/PostBody.astro';
 import PostMeta from '~/components/PostMeta.astro';
-import MoreStories from '~/components/MoreStories.astro';
 import CategoryAbstract from '~/components/CategoryAbstract.astro';
-import SiteNav from '~/components/SiteNav.astro';
+
+import { DraftModeQueryListener } from '~/components/DraftModeQueryListener';
 
 import { StructuredText } from '@datocms/astro';
-import { HeadingWithAnchorLink } from '~/components/HeadingWithAnchorLink.astro';
-import { PageInline } from '~/components/inlineRecord/PageInline.astro';
-import { PageLink } from '~/components/linkToRecord/PageLink.astro';
-import { VideoBlock } from '~/components/blocks/VideoBlock.astro';
-import { ImageBlock } from '~/components/blocks/ImageBlock.astro';
-import { ImageGalleryBlock } from '~/components/blocks/ImageGalleryBlock.astro';
+import { HeadingWithAnchorLink } from '~/components/HeadingWithAnchorLink';
 
-import { TagFragment } from '~/lib/datocms/commonFragments';
-import { ResponsiveImageFragment } from '~/components/ResponsiveImage/fragments';
+import { PageInline } from '~/components/inlineRecord/PageInline';
+import { PageInlineFragment } from '~/components/inlineRecord/PageInline/fragments';
+
+import { PageLink } from '~/components/linkToRecord/PageLink';
+import { PageLinkFragment } from '~/components/linkToRecord/PageLink/fragments';
+
+import { VideoBlock } from '~/components/blocks/VideoBlock';
+import { VideoBlockFragment } from '~/components/blocks/VideoBlock/fragments';
+
+import { ImageBlock } from '~/components/blocks/ImageBlock';
+import { ImageBlockFragment } from '~/components/blocks/ImageBlock/fragments';
+
+import { ImageGalleryBlock } from '~/components/blocks/ImageGalleryBlock';
+import { ImageGalleryBlockFragment } from '~/components/blocks/ImageGalleryBlock/fragments';
+
 import { MetaTags } from '@datocms/astro';
+import MoreStories from '~/components/MoreStories.astro';
 
 import createDOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
@@ -29,25 +41,24 @@ import { JSDOM } from 'jsdom';
 const window = new JSDOM('').window;
 const DOMPurify = createDOMPurify(window);
 
-// Define the interface for static paths
-interface StaticPath {
-  params: {
-    slug: string;
-  };
-}
+// // Define the interface for static paths
+// interface StaticPath {
+//   params: {
+//     slug: string;
+//   };
+// }
+const { slug } = Astro.params;
 
 // Function to generate static paths
 export async function getStaticPaths(): Promise<StaticPath[]> {
   const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
-  const query = graphql(
-    /* GraphQL */ `
-      {
-        allPosts {
-          slug
-        }
+  const query = graphql(/* GraphQL */ `
+    {
+      allPosts {
+        slug
       }
-    `
-  );
+    }
+  `);
 
   const { allPosts } = await executeQuery<{ allPosts: { slug: string }[] }>(query, {
     includeDrafts: draftModeEnabled,
@@ -58,9 +69,6 @@ export async function getStaticPaths(): Promise<StaticPath[]> {
   }));
 }
 
-// Get the slug from params
-const { slug } = Astro.params;
-const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
 
 // Define the query to fetch post data
 const query = graphql(
@@ -85,23 +93,16 @@ const query = graphql(
         content {
           value
           blocks {
-            __typename
-            ... on ImageBlockRecord {
+            ... on RecordInterface {
               id
-              image {
-                responsiveImage(imgixParams: { fm: jpg, fit: clip, w: 1000, h: 600 }) {
-                  ...ResponsiveImageFragment
-                }
-              }
+              __typename
+            }
+            ... on ImageBlockRecord {
+              ...ImageBlockFragment
             }
             ... on VideoBlockRecord {
-              id
-              video {
-                url
-                thumbnailUrl
-              }
+              ...VideoBlockFragment
             }
-            # Include other block types as needed
           }
           links {
             __typename
@@ -129,11 +130,7 @@ const query = graphql(
           slug
         }
       }
-      morePosts: allPosts(
-        orderBy: date_DESC
-        first: 2
-        filter: { slug: { neq: $slug } }
-      ) {
+      morePosts: allPosts(orderBy: date_DESC, first: 2, filter: { slug: { neq: $slug } }) {
         title
         slug
         excerpt
@@ -154,14 +151,19 @@ const query = graphql(
       }
     }
   `,
-  [TagFragment, ResponsiveImageFragment]
+  [
+    TagFragment,
+    ResponsiveImageFragment,
+    ImageBlockFragment,
+    VideoBlockFragment,
+  ],
 );
-
-// Execute the query
-const { site, post, morePosts } = await executeQuery(query, {
+const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
+const { site, post } = await executeQuery(query, {   
   variables: { slug },
-  includeDrafts: draftModeEnabled,
+  includeDrafts: draftModeEnabled 
 });
+
 
 // If the post does not exist, return a 404 page
 if (!post) {
@@ -186,7 +188,8 @@ const sanitizedCategoryDescription = post.category.description
     <div class="mb-8 max-w-2xl mx-auto">
       <PostMeta category={post.category} date={post.date} tags={post.tags} />
     </div>
-    
+
+    <PostBody content={post.content} />
   </article>
 
   <hr />
@@ -196,7 +199,4 @@ const sanitizedCategoryDescription = post.category.description
     description={sanitizedCategoryDescription}
     slug={post.category.slug}
   />
-
-  <hr />
-
 </Layout>

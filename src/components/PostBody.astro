@@ -1,13 +1,12 @@
 ---
 import { StructuredText } from '@datocms/astro';
+import { ImageBlock } from '~/components/blocks/ImageBlock';
+
 import { PageInline } from '~/components/inlineRecord/PageInline.astro';
 import { PageLink } from '~/components/linkToRecord/PageLink.astro';
-
-
 import { HeadingWithAnchorLink } from '~/components/HeadingWithAnchorLink.astro';
-import { VideoBlock } from '~/components/blocks/VideoBlock.astro';
-import { ImageBlock } from '~/components/blocks/ImageBlock.astro';
-import { ImageGalleryBlock } from '~/components/blocks/ImageGalleryBlock.astro';
+import { VideoBlock } from '~/components/blocks/VideoBlock';
+import { ImageGalleryBlock } from '~/components/blocks/ImageGalleryBlock';
 import ResponsiveImage from '../components/ResponsiveImage.astro';
 
 import type {
@@ -23,26 +22,15 @@ interface PostBodyProps {
 
 const { content } = Astro.props as PostBodyProps;
 
-// Define the rendering functions
-const renderLinkToRecord = ({ record, children }: RenderLinkToRecordContext) => {
-      return null;
-};
-
-const renderInlineRecord = ({ record }: RenderInlineRecordContext) => {
-  return null;
-};
-
-const renderBlock = ({ record }: RenderBlockContext) => {
-  return null;
-};
 ---
+
 <div class="max-w-2xl mx-auto">
   <div class="prose prose-lg prose-green">
     <StructuredText
       data={content}
-      renderLinkToRecord={renderLinkToRecord}
-      renderInlineRecord={renderInlineRecord}
-      renderBlock={renderBlock}
+      blockComponents={{
+        ImageBlockRecord: ImageBlock, VideoBlockRecord: VideoBlock, ImageGalleryBlockRecord: ImageGalleryBlock
+      }}
     />
   </div>
 </div>

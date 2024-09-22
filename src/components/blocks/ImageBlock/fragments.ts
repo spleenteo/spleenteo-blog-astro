@@ -17,8 +17,7 @@ import { graphql } from '~/lib/datocms/graphql';
 export const ImageBlockFragment = graphql(
   /* GraphQL */ `
     fragment ImageBlockFragment on ImageBlockRecord {
-      asset {
-        title
+      image {
         responsiveImage(sizes: "(max-width: 700px) 100vw, 700px") {
           ...ResponsiveImageFragment
         }
