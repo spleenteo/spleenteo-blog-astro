@@ -167,8 +167,8 @@ input CategoryModelFilter {
   updatedAt: UpdatedAtFilter
   _isValid: BooleanFilter
   description: TextFilter
-  slug: SlugFilter
   name: StringFilter
+  slug: SlugFilter
   OR: [CategoryModelFilter]
   AND: [CategoryModelFilter]
 }
@@ -2800,16 +2800,16 @@ input PostModelFilter {
   _updatedAt: UpdatedAtFilter
   updatedAt: UpdatedAtFilter
   _isValid: BooleanFilter
-  preview: JsonFilter
   category: LinkFilter
-  date: DateFilter
-  coverImage: FileFilter
-  seoSettings: SeoFilter
-  tags: LinksFilter
   content: StructuredTextFilter
-  title: StringFilter
-  slug: SlugFilter
+  coverImage: FileFilter
+  date: DateFilter
   excerpt: StringFilter
+  preview: JsonFilter
+  seoSettings: SeoFilter
+  slug: SlugFilter
+  tags: LinksFilter
+  title: StringFilter
   OR: [PostModelFilter]
   AND: [PostModelFilter]
 }
@@ -2839,10 +2839,10 @@ enum PostModelOrderBy {
   _isValid_DESC
   date_ASC
   date_DESC
-  title_ASC
-  title_DESC
   excerpt_ASC
   excerpt_DESC
+  title_ASC
+  title_DESC
 }
 
 """Record of type Post (post)"""
@@ -3418,10 +3418,10 @@ input TagModelFilter {
   _updatedAt: UpdatedAtFilter
   updatedAt: UpdatedAtFilter
   _isValid: BooleanFilter
-  seo: SeoFilter
   description: TextFilter
-  slug: SlugFilter
   name: StringFilter
+  seo: SeoFilter
+  slug: SlugFilter
   OR: [TagModelFilter]
   AND: [TagModelFilter]
 }

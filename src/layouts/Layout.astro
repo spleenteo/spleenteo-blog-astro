@@ -21,6 +21,11 @@ const query = graphql(
           ...TagFragment
         }
       }
+      blog {
+        title
+        subtitle
+        _firstPublishedAt
+      }
     }
   `,
   [TagFragment],
@@ -28,6 +33,7 @@ const query = graphql(
 
 const draftModeEnabled = isDraftModeEnabled(Astro.cookies);
 const result = await executeQuery(query, { includeDrafts: draftModeEnabled });
+const { blog } = result as { blog: any;};
 ---
 
 <!doctype html>
@@ -45,5 +51,10 @@ const result = await executeQuery(query, { includeDrafts: draftModeEnabled });
     <main>
       <slot />
     </main>
+    <footer>
+      <p class="text-6xl font-bold">{blog.title}</p>
+      <p>{blog.subtitle}</p>
+      <p>Last Published at {blog._firstPublishedAt}</p>
+      <!-- <DraftModeQueryListener query={query} /> -->
   </body>
 </html>
